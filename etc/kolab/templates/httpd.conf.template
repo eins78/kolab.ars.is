@@ -1,0 +1,375 @@
+KOLAB_META_START
+TARGET=@@@webserver_confdir@@@/apache.conf
+PERMISSIONS=0640
+OWNERSHIP=@@@webserver_musr@@@:@@@webserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc apache reload
+KOLAB_META_END
+# (c) 2003 Tassilo Erlewein <tassilo.erlewein@erfrakon.de>
+# (c) 2003 Martin Konold <martin.konold@erfrakon.de>
+# (c) 2003 Achim Frank <achim.frank@erfrakon.de>
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+### Section 1: Global Environment
+ServerRoot "@@@prefix@@@"
+
+# do not require SSL as default for now
+SSLVerifyClient         none
+#SSLCACertificateFile    @@@sysconfdir@@@/kolab/server.pem
+SSLSessionCache         dbm:@@@webserver_sslscache@@@
+SSLSessionCacheTimeout  300
+SSLMutex                file:@@@webserver_sslmutex@@@
+SSLRandomSeed           startup builtin
+SSLRandomSeed           connect builtin
+
+# FreeBusy list handling
+RewriteEngine On
+#RewriteLog "/tmp/rewrite.log"
+#RewriteLogLevel 9
+# Without DOCUMENT_ROOT the rewrite engine uses a real /freebusy directory
+# on the filesystem before %{DOCUMENT_ROOT}/freebusy.  This may result in
+# unexpected behaviour.
+RewriteRule ^/freebusy/([^/]+)\.ifb %{DOCUMENT_ROOT}/freebusy/freebusy.php?uid=$1
+RewriteRule ^/freebusy/([^/]+)\.vfb %{DOCUMENT_ROOT}/freebusy/freebusy.php?uid=$1
+RewriteRule ^/freebusy/([^/]+)\.xfb %{DOCUMENT_ROOT}/freebusy/freebusy.php?uid=$1&extended=1
+RewriteRule ^/freebusy/trigger/(.+)\.pfb %{DOCUMENT_ROOT}/freebusy/pfb.php?folder=$1&cache=0
+RewriteRule ^/freebusy/(.+)\.pfb %{DOCUMENT_ROOT}/freebusy/pfb.php?folder=$1&cache=1
+RewriteRule ^/freebusy/(.+)\.pxfb %{DOCUMENT_ROOT}/freebusy/pfb.php?folder=$1&cache=1&extended=1
+
+<VirtualHost _default_:443>
+SSLEngine               on
+SSLCipherSuite          ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+SSLCertificateFile      @@@sysconfdir@@@/kolab/cert.pem
+SSLCertificateKeyFile   @@@sysconfdir@@@/kolab/key.pem
+
+RewriteEngine On
+RewriteOptions inherit
+
+<Files ~ "\.(cgi|shtml|phtml|php4|php3?)$">
+   SSLOptions +StdEnvVars
+</Files>
+
+<Directory "@@@webserver_cgidir@@@">
+   SSLOptions +StdEnvVars
+</Directory>
+
+</VirtualHost>
+
+#<IfModule !mpm_winnt.c>
+#<IfModule !mpm_netware.c>
+#LockFile @@@webserver_acceptlock@@@
+#</IfModule>
+#</IfModule>
+
+#<IfModule !mpm_netware.c>
+#<IfModule !perchild.c>
+#ScoreBoardFile @@@webserver_runtime_status@@@
+#</IfModule>
+#</IfModule>
+
+#<IfModule !mpm_netware.c>
+#PidFile @@@webserver_pidfile@@@
+#</IfModule>
+
+User @@@webserver_usr@@@
+Group @@@webserver_grp@@@
+
+Timeout 300
+KeepAlive On
+MaxKeepAliveRequests 100
+KeepAliveTimeout 15
+
+<IfModule mpm_prefork_module>
+PidFile              @@@webserver_pidfile@@@
+StartServers         5
+MinSpareServers      5
+MaxSpareServers     10
+MaxClients         150
+MaxRequestsPerChild  0
+</IfModule>
+
+<IfModule mpm_worker_module>
+StartServers         2
+MaxClients         150
+MinSpareThreads     25
+MaxSpareThreads     75 
+ThreadsPerChild     25
+MaxRequestsPerChild  0
+ServerLimit         16
+</IfModule>
+
+<IfModule mpm_perchild_module>
+NumServers           5
+StartThreads         5
+MinSpareThreads      5
+MaxSpareThreads     10
+MaxThreadsPerChild  20
+MaxRequestsPerChild  0
+</IfModule>
+
+@@@if bind_any@@@
+Listen 80
+Listen 443
+@@@else@@@
+Listen @@@bind_addr@@@:80
+Listen @@@bind_addr@@@:443
+@@@endif@@@
+
+
+### Section 2: 'Main' server configuration
+
+ServerAdmin root@localhost
+#ServerName new.host.name:80
+UseCanonicalName Off
+DocumentRoot "@@@webserver_document_root@@@"
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+</Directory>
+
+#<Directory "@@@webserver_document_root@@@">
+#    Options Indexes FollowSymLinks
+#    AllowOverride None
+#    Order allow,deny
+#    Allow from all
+#</Directory>
+
+#DirectoryIndex index.html 
+AccessFileName .htaccess
+
+<Location "@@@webserver_web_prefix@@@/">
+    ErrorDocument 403 https://@@@fqdnhostname@@@@@@kolab_wui@@@/
+</Location>
+<Location "@@@kolab_wui@@@">
+    SSLRequireSSL
+</Location>
+<Location "@@@webserver_web_prefix@@@/client">
+    ErrorDocument 403 https://@@@fqdnhostname@@@@@@webserver_web_prefix@@@/client/
+    SSLRequireSSL
+</Location>
+<Location "@@@webserver_web_prefix@@@/fbview">
+    ErrorDocument 403 https://@@@fqdnhostname@@@@@@webserver_web_prefix@@@/fbview/
+    SSLRequireSSL
+</Location>
+@@@if apache-http@@@
+@@@else@@@
+<Location "@@@webserver_web_prefix@@@/freebusy">
+    SSLRequireSSL
+</Location>
+@@@endif@@@
+
+# Redirect from the old Kolab web client location (Kolab-Server-2.2.0)
+# to the new one (Kolab-Server >= 2.2.1)
+Redirect /horde https://@@@fqdnhostname@@@/client
+
+<Files ~ "^\.ht">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# FIXME: not autoconfigured - still hardcoded
+TypesConfig etc/apache/mime.types
+DefaultType text/plain
+<IfModule mime_magic_module>
+    MIMEMagicFile @@@webserver_confdir@@@/mime.magic
+</IfModule>
+
+HostnameLookups On
+ErrorLog @@@webserver_errorlogfile@@@
+LogLevel warn
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+LogFormat "%{Referer}i -> %U" referer
+LogFormat "%{User-agent}i" agent
+CustomLog @@@webserver_accesslogfile@@@ common
+
+ServerTokens Full
+ServerSignature On
+
+Alias /public-cal/ics "@@@webserver_document_root@@@/client/kronolith/ics_kolab.php"
+
+<Directory "@@@webserver_document_root@@@/icons">
+    Options Indexes MultiViews
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+ScriptAlias /cgi-bin/ "@@@webserver_document_root@@@/cgi-bin/"
+
+<Directory "@@@webserver_document_root@@@/cgi-bin">
+    AllowOverride None
+    Options None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+<AuthnProviderAlias ldap ldap-mail>
+  AuthLDAPURL ldap://@@@ldap_ip@@@:@@@ldap_port@@@/@@@base_dn@@@?mail
+  AuthLDAPBindDN "@@@php_dn@@@"
+  AuthLDAPBindPassword "@@@php_pw@@@"
+  AuthzLDAPAuthoritative off
+</AuthnProviderAlias>
+<AuthnProviderAlias ldap ldap-uid>
+  AuthLDAPURL ldap://@@@ldap_ip@@@:@@@ldap_port@@@/@@@base_dn@@@?uid
+  AuthLDAPBindDN "@@@php_dn@@@"
+  AuthLDAPBindPassword "@@@php_pw@@@"
+  AuthzLDAPAuthoritative off
+</AuthnProviderAlias>
+
+<Directory "@@@webserver_document_root@@@/freebusy">
+   AllowOverride None
+   Options None
+   # Disallow for everyone as default
+   Order allow,deny
+   Allow from all
+@@@if apache-allow-unauthenticated-fb@@@
+@@@else@@@
+   Require valid-user
+   AuthType Basic
+   AuthName "Kolab Freebusy"
+
+   AuthBasicAuthoritative off
+   AuthUserFile /dev/null
+   AuthBasicProvider ldap-mail ldap-uid
+@@@endif@@@
+   AddDefaultCharset Off  
+</Directory>
+
+<Directory "@@@webserver_document_root@@@/client">
+    AllowOverride All
+    Allow from all
+</Directory>
+
+<Directory "@@@webserver_document_root@@@/fbview">
+    AllowOverride All
+    Allow from all
+</Directory>
+
+<Directory "@@@webserver_document_root@@@@@@kolab_wui@@@">
+   AllowOverride None
+   Options None
+   Order allow,deny
+   Allow from all
+</Directory>
+
+AddIconByEncoding (CMP,/icons/compressed.gif) x-compress x-gzip
+
+AddIconByType (TXT,/icons/text.gif) text/*
+AddIconByType (IMG,/icons/image2.gif) image/*
+AddIconByType (SND,/icons/sound2.gif) audio/*
+AddIconByType (VID,/icons/movie.gif) video/*
+
+AddIcon /icons/binary.gif .bin .exe
+AddIcon /icons/binhex.gif .hqx
+AddIcon /icons/tar.gif .tar
+AddIcon /icons/world2.gif .wrl .wrl.gz .vrml .vrm .iv
+AddIcon /icons/compressed.gif .Z .z .tgz .gz .zip
+AddIcon /icons/a.gif .ps .ai .eps
+AddIcon /icons/layout.gif .html .shtml .htm .pdf
+AddIcon /icons/text.gif .txt
+AddIcon /icons/c.gif .c
+AddIcon /icons/p.gif .pl .py
+AddIcon /icons/f.gif .for
+AddIcon /icons/dvi.gif .dvi
+AddIcon /icons/uuencoded.gif .uu
+AddIcon /icons/script.gif .conf .sh .shar .csh .ksh .tcl
+AddIcon /icons/tex.gif .tex
+AddIcon /icons/bomb.gif core
+AddIcon /icons/back.gif ..
+AddIcon /icons/hand.right.gif README
+AddIcon /icons/folder.gif ^^DIRECTORY^^
+AddIcon /icons/blank.gif ^^BLANKICON^^
+
+DefaultIcon /icons/unknown.gif
+ReadmeName README.html
+HeaderName HEADER.html
+
+IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
+
+AddEncoding x-compress Z
+AddEncoding x-gzip gz tgz
+
+AddLanguage da .dk
+AddLanguage nl .nl
+AddLanguage en .en
+AddLanguage et .et
+AddLanguage fr .fr
+AddLanguage de .de
+AddLanguage he .he
+AddLanguage el .el
+AddLanguage it .it
+AddLanguage ja .ja
+AddLanguage pl .po
+AddLanguage ko .ko
+AddLanguage pt .pt
+AddLanguage nn .nn
+AddLanguage no .no
+AddLanguage pt-br .pt-br
+AddLanguage ltz .ltz
+AddLanguage ca .ca
+AddLanguage es .es
+AddLanguage sv .se
+AddLanguage cz .cz
+AddLanguage ru .ru
+AddLanguage tw .tw
+AddLanguage zh-tw .tw
+AddLanguage hr .hr
+
+LanguagePriority en da nl et fr de el it ja ko no pl pt pt-br ltz ca es sv tw
+#ForceLanguagePriority Prefer Fallback
+
+AddDefaultCharset ISO-8859-1
+
+AddCharset ISO-8859-1  .iso8859-1  .latin1
+AddCharset ISO-8859-2  .iso8859-2  .latin2 .cen
+AddCharset ISO-8859-3  .iso8859-3  .latin3
+AddCharset ISO-8859-4  .iso8859-4  .latin4
+AddCharset ISO-8859-5  .iso8859-5  .latin5 .cyr .iso-ru
+AddCharset ISO-8859-6  .iso8859-6  .latin6 .arb
+AddCharset ISO-8859-7  .iso8859-7  .latin7 .grk
+AddCharset ISO-8859-8  .iso8859-8  .latin8 .heb
+AddCharset ISO-8859-9  .iso8859-9  .latin9 .trk
+AddCharset ISO-2022-JP .iso2022-jp .jis
+AddCharset ISO-2022-KR .iso2022-kr .kis
+AddCharset ISO-2022-CN .iso2022-cn .cis
+AddCharset Big5        .Big5       .big5
+AddCharset WINDOWS-1251 .cp-1251   .win-1251
+AddCharset CP866       .cp866
+AddCharset KOI8-r      .koi8-r .koi8-ru
+AddCharset KOI8-ru     .koi8-uk .ua
+AddCharset ISO-10646-UCS-2 .ucs2
+AddCharset ISO-10646-UCS-4 .ucs4
+AddCharset UTF-8       .utf8
+
+AddCharset GB2312      .gb2312 .gb 
+AddCharset utf-7       .utf7
+AddCharset utf-8       .utf8
+AddCharset big5        .big5 .b5
+AddCharset EUC-TW      .euc-tw
+AddCharset EUC-JP      .euc-jp
+AddCharset EUC-KR      .euc-kr
+AddCharset shift_jis   .sjis
+
+LoadModule php5_module @@@libexecdir@@@/apache/mod_php.so
+AddType application/x-tar .tgz
+AddType application/x-httpd-php .php .php4 .php3 .html
+AddType image/x-icon .ico
+AddHandler type-map var
+DirectoryIndex index.php index.php4 index.php3 index.html
+
+BrowserMatch "Mozilla/2" nokeepalive
+BrowserMatch "MSIE 4\.0b2;" nokeepalive downgrade-1.0 force-response-1.0
+BrowserMatch "RealPlayer 4\.0" force-response-1.0
+BrowserMatch "Java/1\.0" force-response-1.0
+BrowserMatch "JDK/1\.0" force-response-1.0
+BrowserMatch "Microsoft Data Access Internet Publishing Provider" redirect-carefully
+BrowserMatch "^WebDrive" redirect-carefully
+BrowserMatch "^WebDAVFS/1.[012]" redirect-carefully
+
+# used for local non Kolab extension
+Include @@@webserver_confdir@@@/apache.local
+Include @@@webserver_confdir@@@/apache.d/*.conf

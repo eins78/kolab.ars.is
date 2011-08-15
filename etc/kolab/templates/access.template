@@ -1,0 +1,12 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/access
+PERMISSIONS=0640
+OWNERSHIP=@@@emailserver_tables_usr@@@:@@@emailserver_grp@@@
+RUNONCHANGE=@@@sbindir@@@/postmap -o @@@emailserver_confdir@@@/access
+KOLAB_META_END
+# (c) 2008 Mathieu Parent <math.parent@gmail.com>
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+

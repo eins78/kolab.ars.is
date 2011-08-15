@@ -1,0 +1,121 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/master.cf
+PERMISSIONS=0640
+OWNERSHIP=@@@emailserver_usr@@@:@@@emailserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc postfix reload
+KOLAB_META_END
+# (c) 2004 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+# (c) 2003 Tassilo Erlewein <tassilo.erlewein@erfrakon.de>
+# (c) 2003 Martin Konold <martin.konold@erfrakon.de>
+# (c) 2003 Achim Frank <achim.frank@erfrakon.de>
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+# ==========================================================================
+# service type  private unpriv  chroot  wakeup  maxproc command + args
+#               (yes)   (yes)   (yes)   (never) (100)
+# ==========================================================================
+@@@bind_addr@@@:smtp      inet  n       -       n       -       -       smtpd
+@@@bind_addr@@@:submission inet n       -       n       -       -       smtpd
+  -o smtpd_enforce_tls=yes
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+  -o smtpd_sender_restrictions=${submission_sender_restrictions}
+#628      inet  n       -       n       -       -       qmqpd
+pickup    fifo  n       -       n       60      1       pickup
+cleanup   unix  n       -       n       -       0       cleanup
+qmgr      fifo  n       -       n       300     1       qmgr
+tlsmgr    unix  -       -       n       1000?   1       tlsmgr
+rewrite   unix  -       -       n       -       -       trivial-rewrite
+bounce    unix  -       -       n       -       0       bounce
+defer     unix  -       -       n       -       0       bounce
+trace     unix  -       -       n       -       0       bounce
+verify    unix  -       -       n       -       1       verify
+flush     unix  n       -       n       1000?   0       flush
+proxymap  unix  -       -       n       -       -       proxymap
+smtp      unix  -       -       n       -       -       smtp
+relay     unix  -       -       n       -       -       smtp -o fallback_relay=
+showq     unix  n       -       n       -       -       showq
+discard   unix  -       -       n       -       -       discard
+error     unix  -       -       n       -       -       error
+retry     unix  -       -       n       -       -       error
+local     unix  -       n       n       -       -       local
+#virtual   unix  -       n       n       -       -       virtual
+lmtp      unix  -       -       n       -       -       lmtp
+anvil     unix  -       -       n       -       1       anvil
+scache    unix  -       -       n       -       1       scache
+#maildrop unix  -       n       n       -       -       pipe flags=DRhu user=vmail argv=@@@bindir@@@/maildrop -d ${recipient}
+#cyrus    unix  -       n       n       -       -       pipe user=cyrus argv=@@@bindir@@@/cyrdeliver -e -r ${sender} -m ${extension} ${user}
+#uucp     unix  -       n       n       -       -       pipe flags=Fqhu user=uucp argv=@@@bindir@@@/uux -r -n -z -a$sender - $nexthop!rmail ($recipient)
+#ifmail   unix  -       n       n       -       -       pipe flags=F user=ftn argv=@@@bindir@@@/ifmail -r $nexthop ($recipient)
+#bsmtp    unix  -       n       n       -       -       pipe flags=Fq. user=foo argv=@@@bindir@@@/bsmtp -f $sender $nexthop $recipient
+@@@bind_addr@@@:465       inet  n       -       n       -       -       smtpd -o smtpd_tls_wrappermode=yes -o smtpd_sasl_auth_enable=yes 
+post-cleanup unix  n    -       n       -       0       cleanup -o virtual_alias_maps= -o masquerade_domains=
+smtp-amavis unix -	-	n	-	2       smtp
+    -o smtp_data_done_timeout=1200
+    -o smtp_send_xforward_command=yes
+    -o disable_dns_lookups=yes
+# SMTP interface for injecting mail back into postfix
+# from kolabfilter
+@@@local_addr@@@:10025 inet n	-	n	-	-  smtpd
+@@@if postfix-enable-virus-scan@@@
+    -o content_filter=smtp-amavis:[@@@local_addr@@@]:10024
+@@@else@@@
+    -o content_filter=
+@@@endif@@@
+    -o cleanup_service_name=post-cleanup
+    -o local_recipient_maps=
+    -o relay_recipient_maps=
+    -o smtpd_restriction_classes=
+    -o smtpd_client_restrictions=
+    -o smtpd_helo_restrictions=
+    -o smtpd_sender_restrictions=
+    -o smtpd_recipient_restrictions=permit_mynetworks,reject
+    -o mynetworks=127.0.0.0/8
+    -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+    -o strict_rfc821_envelopes=yes
+    -o smtpd_error_sleep_time=0
+    -o smtpd_soft_error_limit=1001
+    -o smtpd_hard_error_limit=1000
+# SMTP interface for injecting mail back into postfix
+# from amavis
+@@@local_addr@@@:10026 inet n	-	n	-	-  smtpd
+    -o content_filter=
+    -o cleanup_service_name=post-cleanup
+    -o local_recipient_maps=
+    -o relay_recipient_maps=
+    -o smtpd_restriction_classes=
+    -o smtpd_client_restrictions=
+    -o smtpd_helo_restrictions=
+    -o smtpd_sender_restrictions=
+    -o smtpd_recipient_restrictions=permit_mynetworks,reject
+    -o mynetworks=127.0.0.0/8
+    -o strict_rfc821_envelopes=yes
+    -o smtpd_error_sleep_time=0
+    -o smtpd_soft_error_limit=1001
+    -o smtpd_hard_error_limit=1000
+kolabpolicy    unix  -       n       n       -       -       spawn user=@@@emailserver_master_usr@@@ argv=@@@bindir@@@/kolab_smtpdpolicy 
+
+kolabfilter     unix  -       n       n       -       -       pipe user=@@@emailserver_master_usr@@@ null_sender= argv=@@@PHP@@@
+    -c @@@phpini_dir@@@/php.ini
+    -f @@@resmgr_scriptsdir@@@/kolabfilter 
+    --
+    --host=@@@fqdnhostname@@@
+    --sender=${sender}
+    --recipient=${recipient}
+    --client=${client_address}
+    --user=${sasl_username}
+    --config=@@@resmgr_confdir@@@/kolabfilter.conf
+
+kolabmailboxfilter     unix  -       n       n       -       -       pipe user=@@@emailserver_master_usr@@@ null_sender= argv=@@@PHP@@@
+    -c @@@phpini_dir@@@/php.ini
+    -f @@@resmgr_scriptsdir@@@/kolabmailboxfilter 
+    --
+    --host=@@@fqdnhostname@@@
+    --sender=${sender}
+    --recipient=${recipient}
+    --client=${client_address}
+    --config=@@@resmgr_confdir@@@/kolabfilter.conf
+

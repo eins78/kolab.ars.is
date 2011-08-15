@@ -1,0 +1,7 @@
+KOLAB_META_START
+TARGET=@@@sasl_smtpconffile@@@
+PERMISSIONS=0644
+OWNERSHIP=@@@emailserver_usr@@@:@@@emailserver_grp@@@
+KOLAB_META_END
+pwcheck_method: saslauthd
+mech_list: plain login

@@ -1,0 +1,117 @@
+KOLAB_META_START
+TARGET=@@@phplibdir@@@/KolabAdmin/include/config.php
+PERMISSIONS=0640
+OWNERSHIP=@@@webserver_musr@@@:@@@webserver_grp@@@
+KOLAB_META_END
+<?php
+@@@warning@@@
+
+/**
+ * (c) 2005 Steffen Hansen <steffen@klaralvdalens-datakonsult.se>
+ * (c) 2004 Klarälvdalens Datakonsult AB
+ * (c) 2003 Tassilo Erlewein <tassilo.erlewein@erfrakon.de>
+ * (c) 2003 Martin Konold <martin.konold@erfrakon.de>
+ *
+ *    Written by Steffen Hansen <steffen@klaralvdalens-datakonsult.se>
+ *
+ *  This  program is free  software; you can redistribute  it and/or
+ *  modify it  under the terms of the GNU  General Public License as
+ *  published by the  Free Software Foundation; either version 2, or
+ *  (at your option) any later version.
+ *
+ *  This program is  distributed in the hope that it will be useful,
+ *  but WITHOUT  ANY WARRANTY; without even the  implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *  General Public License for more details.
+ *
+ *  You can view the  GNU General Public License, online, at the GNU
+ *  Project's homepage; see <http://www.gnu.org/licenses/gpl.html>.
+ */
+
+$topdir = '/@@@kolab_php_module_prefix@@@admin';
+$kolab_prefix = '@@@prefix@@@';
+$php_dir      = '@@@phplibdir@@@';
+$locale_dir   = "$php_dir/data/KolabAdmin/locale/";
+$smarty_compiledir = '@@@smarty_compiledir@@@/';
+
+require_once('@@@kolab_php_smarty_prefix@@@/Smarty.class.php');
+
+$webserver_web_prefix = '@@@webserver_web_prefix@@@';
+
+$WITHOPENPKG = '@@@WITHOPENPKG@@@';
+$RPM = '@@@RPM@@@';
+$kolab_pkgs = '@@@kolab_pkgs@@@';
+$pear_horde_pkgs = '@@@pear_horde_pkgs@@@';
+$kolabversion = '2.3.2';
+
+/*
+ * Session variables fetched from LDAP
+ *
+ * TODO(steffen): Make those variables non-session variables.
+ * We dont really need to store those in the session,
+ * since we source this file on every invokation anyway.
+ */
+
+@session_start();
+
+$_SESSION['fqdnhostname'] = "@@@fqdnhostname@@@";
+$_SESSION['ldap_master_uri'] = "@@@ldap_master_uri@@@";
+$_SESSION['base_dn'] = "@@@base_dn@@@";
+$_SESSION['php_dn'] = "@@@php_dn@@@";
+$_SESSION['php_pw'] = "@@@php_pw@@@";
+
+
+/***********************************************************************
+ * Global config
+ */
+
+$params = array();
+
+/*
+ * Entry location of the web admin user interface.
+ */
+$params['kolab_wui'] = '@@@kolab_wui@@@';
+
+/*
+ * Which user classes can log in to the webgui?
+ * Currently 4 user classes exist: user, admin, maintainer and manager
+ */
+$params['allow_user_classes'] = array( 'user', 'admin', 'maintainer', 'manager', 'domain-maintainer' );
+
+/*
+ * Array to configure visibility/access of LDAP attributes to user's account object
+ *
+ * Possible values for attribute is 
+ *
+ * 'ro' (readonly)
+ * 'rw' (read/write)
+ * 'hidden' (atribute removed from display)
+ * 'mandatory' (read/write and must not be empty)
+ *
+ * If an attribute is not in this array, it defaults to 'rw'
+ *
+ * Note, attributes correspond to form attribute names and not LDAP attribute names.
+ *
+ * TODO(steffen): Make form and LDAP attributes the same.
+ */
+
+$params['attribute_access'] = array(
+			 /*
+                         // Examples
+			 'firstname'  => 'ro',
+			 'lastname'   => 'ro',
+			 'password'   => 'rw',
+			 'mail'       => 'ro',
+			 'uid'        => 'ro',
+			 'title'      => 'ro',
+			 'roomNumber' => 'mandatory',
+			 'kolabdelegate'  => 'ro',
+			 'telephoneNumber' => 'hidden'
+			 */
+);
+
+/**
+ * Hide section administrative email addresses (hostmaster@..., postmaster@...)
+ * in the "Settings" section.
+ */
+define('HIDE_ADMINISTRATIVE_EMAILSETTINGS', false);

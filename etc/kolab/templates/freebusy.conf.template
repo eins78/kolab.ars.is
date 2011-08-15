@@ -1,0 +1,215 @@
+KOLAB_META_START
+TARGET=@@@freebusy_confdir@@@/config.php
+PERMISSIONS=0640
+OWNERSHIP=@@@freebusy_usr@@@:@@@freebusy_grp@@@
+KOLAB_META_END
+<?php
+@@@warning@@@
+
+/*
+ *  COPYRIGHT
+ *  ---------
+ *
+ *  See docs/AUTHORS file
+ *
+ *
+ *  LICENSE
+ *  -------
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  $Revision$
+ *
+ *  ABOUT
+ *  -----
+ *
+ *  This file provides configuration settings for both the
+ *  freebusy.php and the pfb.php scripts.
+ *
+ */
+
+$conf = array();
+
+/* Horde::Log configuration */
+$conf['log']['enabled']          = true;
+$conf['log']['priority']         = PEAR_LOG_INFO;
+$conf['log']['type']             = '@@@freebusy_log_type@@@';
+$conf['log']['name']             = '@@@freebusy_log_name@@@';
+$conf['log']['ident']            = 'Kolab Free/Busy';
+$conf['log']['params']['append'] = true;
+
+/* PHP error logging */
+ini_set('error_log', '@@@freebusy_logdir@@@/php-error.log');
+
+/* Horde::Kolab::LDAP configuration */
+$conf['kolab']['ldap']['server'] = '@@@ldap_uri@@@';
+$conf['kolab']['ldap']['basedn'] = '@@@base_dn@@@';
+$conf['kolab']['ldap']['phpdn']  = '@@@php_dn@@@';
+$conf['kolab']['ldap']['phppw']  = '@@@php_pw@@@';
+
+/**
+ * If you use customized LDAP attributes on your LDAP server the
+ * following configuration setting allows you to map the standard
+ * Kolab attribute names to your customizations.
+ *
+ * Specify the mapping line by line:
+ *
+ * $conf['kolab']['ldap']['map']['uid'] = 'uid2';
+ * $conf['kolab']['ldap']['map']['mobile'] = 'handy';
+ *
+ * or use a hash structure:
+ *
+ * $conf['kolab']['ldap']['map'] = array('uid' => 'uid2',
+ *                                       'mobile' => 'handy');
+ *
+ */
+//$conf['kolab']['ldap']['map']['uid'] = 'uid2';
+
+/**
+ * If you use customized LDAP attributes on your LDAP server the
+ * following configuration setting allows you to map the standard
+ * Kolab attribute names to your customizations.
+ *
+ * Specify the mapping line by line:
+ *
+ * $conf['kolab']['ldap']['map']['uid'] = 'uid2';
+ * $conf['kolab']['ldap']['map']['mobile'] = 'handy';
+ *
+ * or use a hash structure:
+ *
+ * $conf['kolab']['ldap']['map'] = array('uid' => 'uid2',
+ *                                       'mobile' => 'handy');
+ *
+ */
+//$conf['kolab']['ldap']['map']['uid'] = 'uid2';
+
+/* Horde::Kolab::IMAP configuration */
+$conf['kolab']['imap']['server']   = '@@@fqdnhostname@@@';
+$conf['kolab']['imap']['port']     = 143;
+$conf['kolab']['imap']['protocol'] = 'notls/readonly';
+
+/* Horde::Auth configuration */
+$conf['auth']['params']['login_block'] = 0;
+$conf['auth']['checkbrowser']          = false;
+$conf['auth']['checkip']               = false;
+$conf['umask'] = false;
+
+/* Allow special users to log into the system */
+$conf['kolab']['imap']['allow_special_users'] = true;
+
+/* Do not record login attempts */
+$conf['auth']['params']['login_block'] = false;
+
+/* Kolab::Freebusy configuration */
+
+/* Should we redirect using a Location header, if the user is not local? If this
+ * is false we silently download the file ourselves and output it so that it
+ * looks as though the free/busy information is coming from us.
+ */
+$conf['fb']['redirect']     = false;
+
+/* What is the address of the current server where the free/busy data can be accessed?
+ */
+$conf['kolab']['freebusy']['server']  = 'https://@@@fqdnhostname@@@/freebusy';
+
+/* What is our default mail domain? This is used if any users do not have
+ * '@domain' specified after their username as part of their email address.
+ */
+$conf['fb']['email_domain'] = '@@@fqdnhostname@@@';
+
+/* Location of the cache files */
+$conf['fb']['cache_dir']    = '@@@freebusy_cachedir@@@';
+
+/* What db type to use for the freebusy caches */
+$conf['fb']['dbformat']     = 'db4';
+
+/* Should we send a Content-Type header, indicating what the mime type of the
+ * resulting VFB file is?
+ */
+$conf['fb']['send_content_type'] = false;
+
+/* Should we send a Content-Length header, indicating how large the resulting
+ * VFB file is?
+ */
+$conf['fb']['send_content_length'] = false;
+
+/* Should we send a Content-Disposition header, indicating what the name of the
+ * resulting VFB file should be?
+ */
+$conf['fb']['send_content_disposition'] = false;
+
+/* Should we use ACLs or does everybody get full rights? DO NOT set
+ * this to false if you don't know what you are doing. Your free/busy
+ * service should not be visible to any outside networks when
+ * disabling the use of ACL settings.
+ */
+$conf['fb']['use_acls'] = true;
+
+/* How many days in advance should the free/busy information be calculated? This
+ * is the default value that can be overwritten by the kolabFreeBusyFuture
+ * attribute of the users LDAP account.
+ */
+$conf['fb']['future_days'] = 180;
+
+/* The resulting vCalendar file is being cached. The following setting
+ * determines how many seconds it will be delivered without checking if
+ * the contents of the file might have changed. A negative setting disables
+ * caching (which is currently required for the resource management to work).
+ */
+$conf['fb']['vcal_cache']['min_age'] = -1;
+
+/* The resulting vCalendar file is being cached. The following setting
+ * determines after how many seconds it will be considered too old for
+ * delivery and a refresh of its contents will be enforced.
+ */
+$conf['fb']['vcal_cache']['max_age'] = 259200;
+
+
+/* Are there remote servers on which users have additional (shared)
+ * folders? In that case free/busy information should also be fetched
+ * from these servers.
+ *
+ * Add them like this:
+ *
+ * array('remote1.example.com', 'remote2.example.com')
+ */
+$conf['fb']['remote_servers'] = array();
+
+/**
+ * Ensure we use the Kolab group driver when handling groups.
+ */
+$conf['group']['driver'] = 'kolab';
+$conf['group']['cache'] = false;
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+// If you modify this file, please do not forget to ping upstream
+// about synchronizing this file with
+//
+// http://cvs.horde.org/framework/Kolab_FreeBusy/www/Horde/Kolab/FreeBusy/config.php
+//
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// DEBUGGING
+// =========
+//
+// Activate this to see the log messages on the screen
+// $conf['log']['type'] = 'display';
+//
+// Activate this to see the php messages on the screen
+// ini_set('display_errors', 1);
+//
+// Both setting will disrupt header delivery (which should not cause a
+// problem).

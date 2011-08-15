@@ -1,0 +1,187 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/main.cf
+PERMISSIONS=0644
+OWNERSHIP=@@@emailserver_usr@@@:@@@emailserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc postfix reload
+KOLAB_META_END
+# (c) 2004 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+# (c) 2003 Tassilo Erlewein <tassilo.erlewein@erfrakon.de>
+# (c) 2003-2008 Martin Konold <martin.konold@erfrakon.de>
+# (c) 2003 Achim Frank <achim.frank@erfrakon.de>
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+# postfix default is 10 240 000 Byte = 10.24 Megabyte, 
+# we use 20 Megabyte = 20*2^20 Byte as Kolab default
+@@@if postfix-message-size-limit@@@
+message_size_limit = @@@postfix-message-size-limit@@@
+@@@else@@@
+message_size_limit = 20971520
+@@@endif@@@
+
+#   paths
+command_directory = @@@sbindir@@@
+daemon_directory = @@@libexecdir@@@/postfix
+queue_directory = @@@emailserver_localstatedir@@@
+
+#   users
+mail_owner= @@@emailserver_mail_owner@@@
+setgid_group= @@@emailserver_setgid_grp@@@
+default_privs= @@@emailserver_default_privs@@@
+
+#   local host
+myhostname = @@@fqdnhostname@@@
+mydomain = @@@postfix-mydomain@@@
+myorigin = $mydomain
+@@@if postfix-relayhost@@@
+
+# Postfix Relay Host
+#
+# Check if there is also a relayport otherwise put the default
+@@@if postfix-relayport@@@
+relayhost = [@@@postfix-relayhost@@@]:@@@postfix-relayport@@@
+@@@else@@@
+relayhost = [@@@postfix-relayhost@@@]
+@@@endif@@@
+@@@endif@@@
+
+# 
+masquerade_domains = @@@postfix-mydestination|join( )@@@
+#       Kolab Server does _not_ want to forward to local machines by default,
+#       so we can add "envelope_recipient" to masquerade_classes:
+masquerade_classes = envelope_sender, envelope_recipient,
+                     header_sender, header_recipient
+
+# See kolab/issue3549 (append_dot_mydomain allows circumventing kolabfilter-verify-from-header)
+append_dot_mydomain = no
+remote_header_rewrite_domain = domain.invalid
+
+#   smtp daemon
+#smtpd_banner = $myhostname ESMTP $mail_name
+@@@if bind_any@@@
+@@@else@@@
+inet_interfaces = @@@local_addr@@@, @@@bind_addr@@@
+@@@endif@@@
+
+#   relaying
+mynetworks = @@@postfix-mynetworks|join( )@@@
+mydestination = @@@postfix-mydestination|join( )@@@
+relay_domains = 
+#smtpd_recipient_restrictions = permit_mynetworks, 
+#                               check_client_access hash:@emailserver_confdir@/access,
+#                               check_relay_domains
+
+
+recipient_delimiter = +
+
+#   maps
+canonical_maps = hash:@@@emailserver_confdir@@@/canonical
+virtual_alias_maps =  hash:@@@emailserver_confdir@@@/virtual, 
+	ldap:@@@emailserver_confdir@@@/ldapdistlist.cf, 
+	ldap:@@@emailserver_confdir@@@/ldapvirtual.cf
+relocated_maps = hash:@@@emailserver_confdir@@@/relocated
+transport_maps = hash:@@@emailserver_confdir@@@/transport, ldap:@@@emailserver_confdir@@@/ldaptransport.cf
+alias_maps = hash:@@@aliases_file@@@
+alias_database = hash:@@@aliases_file@@@
+#virtual_mailbox_maps = $virtual_alias_maps
+local_recipient_maps = $virtual_alias_maps, $alias_maps
+
+# Don't parse and modify headers of message/rfc822 attachments
+disable_mime_input_processing = yes
+
+# enable header_checks (not for attachment headers):
+header_checks = regexp:@@@emailserver_confdir@@@/header_checks
+# disable_mime_input_processing = yes already implies that attachment headers
+# are not being checked, but just to be sure:
+mime_header_checks =
+nested_header_checks =
+
+## only use local_transport or a higher recipent_limit if issue825 is fixed
+#   local delivery, not using postfix local(8)
+#local_transport = kolabmailboxfilter
+#   alternatively with local(8), something like
+mailbox_transport = kolabmailboxfilter
+# local_destination_recipient_limit = 20
+
+#TLS settings
+smtpd_use_tls = yes
+smtpd_tls_auth_only = yes
+smtpd_starttls_timeout = 300s
+smtpd_timeout = 300s
+#smtpd_tls_CAfile = @@@sysconfdir@@@/kolab/server.pem
+#smtpd_tls_CApath =
+#smtpd_tls_ask_ccert = no
+#smtpd_tls_ccert_verifydepth = 5
+smtpd_tls_cert_file = @@@sysconfdir@@@/kolab/cert.pem
+#smtpd_tls_cipherlist =
+#smtpd_tls_dcert_file =
+#smtpd_tls_dh1024_param_file =
+#smtpd_tls_dh512_param_file =
+#smtpd_tls_dkey_file = $smtpd_tls_dcert_file
+#smtpd_tls_key_file = $smtpd_tls_cert_file
+smtpd_tls_key_file = @@@sysconfdir@@@/kolab/key.pem
+smtpd_tls_loglevel = 1
+smtpd_tls_received_header = no
+#smtpd_tls_req_ccert = no
+#smtpd_tls_session_cache_database =
+smtpd_tls_session_cache_timeout = 3600s
+#smtpd_tls_wrappermode = no
+
+#tls_random_bytes = 32
+tls_random_source = dev:/dev/urandom
+#tls_daemon_random_bytes = 32
+#tls_daemon_random_source =
+#tls_random_exchange_name = ${config_directory}/prng_exch
+#tls_random_prng_update_period = 60s
+#tls_random_reseed_period = 3600s
+
+#smtp_starttls_timeout = 300s
+#smtp_tls_CAfile =
+#smtp_tls_CApath =
+#smtp_tls_cert_file =
+#smtp_tls_cipherlist =
+#smtp_tls_dcert_file =
+#smtp_tls_dkey_file = $smtp_tls_dcert_file
+#smtp_tls_enforce_peername = yes
+#smtp_tls_key_file = $smtp_tls_cert_file
+#smtp_tls_loglevel = 0
+#smtp_tls_note_starttls_offer = no
+#smtp_tls_per_site =
+#smtp_tls_scert_verifydepth = 5
+#smtp_tls_session_cache_database =
+#smtp_tls_session_cache_timeout = 3600s
+
+#   authentication via sasl
+
+## Kolab Policy Server
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated,
+	reject_unauth_destination, reject_unlisted_recipient,
+	check_policy_service unix:private/kolabpolicy
+smtpd_sender_restrictions = permit_mynetworks,
+	check_policy_service unix:private/kolabpolicy
+submission_sender_restrictions = check_policy_service unix:private/kolabpolicy
+kolabpolicy_time_limit = 3600
+kolabpolicy_max_idle = 20
+
+#smtpd_restriction_classes =
+smtpd_sasl_auth_enable = yes
+
+# We want to allow for uids without any realm
+#smtpd_sasl_local_domain = $myhostname
+smtpd_sasl_local_domain =
+
+smtpd_sasl_security_options = noanonymous
+
+# Support broken clients like Microsoft Outlook Express 4.x which expect AUTH=LOGIN instead of AUTH LOGIN
+broken_sasl_auth_clients = yes
+
+# useful for checking authentication status esp. when using dynamic IPs for the sending client and doing authorization
+smtpd_sasl_authenticated_header = yes
+
+# Verbatim NUL bytes violate RfC 2822 and later and dont work with IMAP.
+# So we reject messages containing them (see kolab/issue3594).
+message_reject_characters = \0
+
+content_filter = kolabfilter

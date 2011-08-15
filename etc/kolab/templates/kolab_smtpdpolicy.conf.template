@@ -1,0 +1,23 @@
+KOLAB_META_START
+TARGET=@@@sysconfdir@@@/kolab/kolab_smtpdpolicy.conf
+PERMISSIONS=0640
+OWNERSHIP=@@@kolab_smtpdpolicy_conffile_usr@@@:@@@kolab_smtpdpolicy_conffile_grp@@@
+KOLAB_META_END
+# (c) 2005 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+#
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+ldap_uri: @@@ldap_uri@@@
+basedn: @@@user_dn_list@@@
+binddn: @@@php_dn@@@
+bindpw: @@@php_pw@@@
+domain: @@@postfix-mydomain@@@
+@@@if postfix-allow-unauthenticated@@@
+allow_unauth: 1
+@@@else@@@
+allow_unauth: 0
+@@@endif@@@
+permithosts: @@@kolabhost|join(,)@@@

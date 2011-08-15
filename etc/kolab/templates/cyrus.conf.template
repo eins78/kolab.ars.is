@@ -1,0 +1,67 @@
+KOLAB_META_START
+TARGET=@@@imap_confdir@@@/cyrus.conf
+PERMISSIONS=0640
+OWNERSHIP=@@@imap_usr@@@:@@@imap_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc imapd reload
+KOLAB_META_END
+# (c) 2003 Tassilo Erlewein <tassilo.erlewein@erfrakon.de>
+# (c) 2003 Martin Konold <martin.konold@erfrakon.de>
+# (c) 2003 Achim Frank <achim.frank@erfrakon.de>
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+START {
+  # do not delete this entry!
+  recover	cmd="ctl_cyrusdb -r"
+
+  # this is only necessary if using idled for IMAP IDLE
+  #idled		cmd="idled"
+
+  # Initial mupdate syncronisation
+  #mupdatepush   cmd="ctl_mboxlist -m"
+}
+
+# UNIX sockets start with a slash and are put into /openpkg/var/imapd/sockets
+SERVICES {
+@@@if cyrus-imap@@@
+  imap cmd="imapd -C @@@imap_confdir@@@/imapd.conf" listen="@@@bind_addr@@@:143" prefork=0
+@@@else@@@
+  imap cmd="imapd -C @@@imap_confdir@@@/imapd.conf" listen="@@@local_addr@@@:143" prefork=0
+@@@endif@@@
+@@@if cyrus-imaps@@@
+  imaps cmd="imapd -s -C @@@imap_confdir@@@/imapd.conf" listen="@@@bind_addr@@@:993" prefork=0
+@@@endif@@@
+@@@if cyrus-pop3@@@
+  pop3 cmd="pop3d -C @@@imap_confdir@@@/imapd.conf" listen="@@@bind_addr@@@:110" prefork=0
+@@@endif@@@
+@@@if cyrus-pop3s@@@
+  pop3s cmd="pop3d -s -C @@@imap_confdir@@@/imapd.conf" listen="@@@bind_addr@@@:995" prefork=0
+@@@endif@@@
+@@@if cyrus-sieve@@@
+  sieve cmd="timsieved -C @@@imap_confdir@@@/imapd.conf" listen="@@@bind_addr@@@:2000" prefork=0
+@@@endif@@@
+
+#@@@if is-master@@@
+#  mupdate       cmd="mupdate -m" listen=3905 prefork=1
+#@@@endif@@@
+
+  # LMTP is required for delivery
+  lmtpunix	cmd="lmtpd" listen="@@@emailserver_socket@@@" prefork=0
+  lmtp          cmd="lmtpd -a" listen="@@@local_addr@@@:2003"
+
+  # this is only necessary if using notifications
+  notifyd	cmd="notifyd" listen="@@@imap_notify_socket@@@" proto="udp" prefork=1
+}
+
+EVENTS {
+  # this is required
+  checkpoint	cmd="ctl_cyrusdb -c" period=30
+
+  # this is only necessary if using duplicate delivery suppression
+  delprune	cmd="cyr_expire -E 3" at=0400
+
+  # this is only necessary if caching TLS sessions
+  tlsprune	cmd="tls_prune" period=1440
+}

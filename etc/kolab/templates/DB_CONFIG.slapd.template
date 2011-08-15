@@ -1,0 +1,26 @@
+KOLAB_META_START
+TARGET=@@@ldapserver_dir@@@/DB_CONFIG
+PERMISSIONS=0640
+OWNERSHIP=@@@ldapserver_usr@@@:@@@ldapserver_rgrp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc openldap restart
+KOLAB_META_END
+# (c) 2005 Klaraelvdalens Datakonsult AB
+#     Written by Steffen Hansen <steffen@klaralvdalens-datakonsult.se>
+#
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+set_cachesize   0       26214400        1
+set_tmp_dir /dev/shm
+
+#http://www.sleepycat.com/docs/api_c/env_set_lk_detect.html
+#Set if the deadlock detector is to be run whenever 
+#a lock conflict occurs, and specify what lock request(s) should be rejected.
+#
+# DB_LOCK_DEFAULT
+# Use whatever lock policy was specified when the database environment 
+# was created. If no lock policy has yet been specified, 
+# set the lock policy to DB_LOCK_RANDOM.
+set_lk_detect DB_LOCK_DEFAULT

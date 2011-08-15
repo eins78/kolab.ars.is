@@ -1,0 +1,15 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/header_checks
+PERMISSIONS=0640
+OWNERSHIP=@@@emailserver_tables_usr@@@:@@@emailserver_grp@@@
+KOLAB_META_END
+@@@warning@@@
+
+# Cyrus does not like empty Message-Id: headers, see kolab/issue2350
+/^Message-Id:[[:space:]]*$/	IGNORE
+
+# Do not allow receiving mails which are already marked as read, flagged, etc.
+/^Status:/	IGNORE
+/^X-Status:/	IGNORE
+/^X-Label:/	IGNORE
+

@@ -1,0 +1,18 @@
+KOLAB_META_START
+TARGET=@@@sysconfdir@@@/rc.conf
+PERMISSIONS=0644
+OWNERSHIP=@@@kolab_musr@@@:@@@kolab_mgrp@@@
+KOLAB_META_END
+# (c) 2004 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+#
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+openldap_url="ldap://@@@bind_addr@@@/ ldaps://@@@bind_addr@@@/"
+sasl_authmech="ldap"
+sasl_threads="5"
+
+spamassassin_enable="no"
+clamav_update="hourly"

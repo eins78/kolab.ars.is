@@ -1,0 +1,53 @@
+KOLAB_META_START
+TARGET=@@@phpini_dir@@@/php.ini
+PERMISSIONS=0640
+OWNERSHIP=@@@webserver_musr@@@:@@@webserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc apache reload
+COMMENT_CHAR=;
+KOLAB_META_END
+@@@warning@@@
+
+;;
+;;  php.ini -- PHP Configuration
+;;
+
+[PHP]
+
+;   Resource Limits
+register_globals   = off    ; Global variables are no longer registered for input data
+allow_url_fopen    = on     ; Disable the opening of remote URLs
+display_errors     = off    ; Errors will NOT be displayed
+log_errors         = on     ; Errors will be logged
+max_execution_time = 120    ; Maximum execution time of each script, in seconds
+max_input_time     = 60     ; Maximum amount of time each script may spend parsing request data
+memory_limit       = 64M    ; Maximum amount of memory a script may consume
+post_max_size      = 8M     ; Maximum amount of POST data accepted
+
+magic_quotes_gpc   = 0      ; Automatically quote posted variables. Required to be "0" for the
+                            ; webadmin to work. Horde does not care and removes them anyway if
+                            ; the setting is "1". The setting will be removed in PHP 6 and "0"
+                            ; will be the default then.
+
+error_reporting    = E_ALL & ~E_DEPRECATED
+error_log          = @@@webserver_logdir@@@/php/php-errors.log
+upload_tmp_dir     = @@@webserver_tmpdir@@@
+
+;   Include Paths
+;include_path          = ".:/kolab/lib/php"
+include_path          = ".:@@@phplibdir@@@"
+
+; FIXME: Do not hardcode the timezone setting
+;
+; The value used below is of course no acceptable setting:
+; But the parameter is required for newer PHP versions as these
+; versions refrain from using the timezone detected via the system setting.
+;
+; It is probably necessary to add the parameter to kolab_bootstrap but 
+; before doing that I add this temporary setting to allow Horde to run.
+date.timezone = Europe/Berlin
+
+[Session]
+session.save_path = @@@webserver_sessions@@@
+
+[mail function]
+sendmail_path = @@@sbindir@@@/sendmail -t -i

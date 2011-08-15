@@ -1,0 +1,29 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/ldaptransport.cf
+PERMISSIONS=0640
+OWNERSHIP=@@@emailserver_usr@@@:@@@emailserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc postfix reload
+KOLAB_META_END
+# (c) 2005 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+#
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+#
+# LDAP Transport for multilocation support
+#
+
+server_host = @@@ldap_uri@@@
+search_base = @@@user_dn_list@@@
+query_filter = (&(mail=%s)(objectClass=kolabInetOrgPerson)(!(kolabHomeServer=@@@fqdnhostname@@@)))
+result_attribute = kolabHomeServer
+result_filter = smtp:[%s]
+search_timeout = 15
+scope = sub
+bind = yes
+bind_dn = @@@php_dn@@@
+bind_pw = @@@php_pw@@@
+version = 3
+#debuglevel = 255

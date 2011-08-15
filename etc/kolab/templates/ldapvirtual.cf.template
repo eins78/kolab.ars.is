@@ -1,0 +1,28 @@
+KOLAB_META_START
+TARGET=@@@emailserver_confdir@@@/ldapvirtual.cf
+PERMISSIONS=0640
+OWNERSHIP=@@@emailserver_usr@@@:@@@emailserver_grp@@@
+KOLAB_META_END
+# (c) 2005 Steffen Hansen <steffen@klaralvdalens-datakonsult.se> (Klaralvdalens Datakonsult AB)
+#
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+#
+# LDAP Alias support for postfix
+#
+
+server_host = @@@ldap_uri@@@
+search_base = @@@user_dn_list@@@
+query_filter = (&(!(kolabDeleteFlag=*))(|(alias=%s)(mail=%s))(!(cn:dn:=external)))
+result_attribute = mail
+result_filter = %s
+search_timeout = 15
+scope = sub
+bind = yes
+bind_dn = @@@php_dn@@@
+bind_pw = @@@php_pw@@@
+version = 3
+#debuglevel = 255

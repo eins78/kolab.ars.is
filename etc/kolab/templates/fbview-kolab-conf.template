@@ -1,0 +1,21 @@
+KOLAB_META_START
+TARGET=@@@webserver_document_root@@@/fbview/config/kolab.php
+PERMISSIONS=0600
+OWNERSHIP=@@@kolab_usr@@@:@@@kolab_grp@@@
+KOLAB_META_END
+<?php
+$conf['cookie']['domain'] = '@@@fqdnhostname@@@';
+$conf['cookie']['path'] = '/fbview';
+$conf['problems']['email'] = 'postmaster@@@@postfix-mydomain@@@';
+$conf['problems']['maildomain'] = '@@@postfix-mydomain@@@';
+$conf['kolab']['ldap']['server'] = '@@@fqdnhostname@@@';
+$conf['kolab']['ldap']['basedn'] = '@@@base_dn@@@';
+$conf['kolab']['ldap']['phpdn'] = '@@@php_dn@@@';
+$conf['kolab']['ldap']['phppw'] = '@@@php_pw@@@';
+@@@if cyrus-imap@@@
+$conf['kolab']['imap']['server'] = '@@@fqdnhostname@@@';
+@@@else@@@
+$conf['kolab']['imap']['server'] = '@@@local_addr@@@';
+@@@endif@@@
+$conf['kolab']['imap']['maildomain'] = '@@@postfix-mydomain@@@';
+?>

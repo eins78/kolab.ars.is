@@ -1,0 +1,27 @@
+KOLAB_META_START
+TARGET=@@@ldapserver_confdir@@@/ldap.conf
+PERMISSIONS=0644
+OWNERSHIP=@@@ldapserver_usr@@@:@@@ldapserver_grp@@@
+KOLAB_META_END
+# (c) 2004 Klaraelvdalens Datakonsult AB
+# This program is Free Software under the GNU General Public License (>=v2).
+# Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+#
+# LDAP Defaults
+#
+
+# See ldap.conf(5) for details
+# This file should be world readable but not world writable.
+
+#BASE	dc=example, dc=com
+#URI	ldap://ldap.example.com ldap://ldap-master.example.com:666
+
+#SIZELIMIT	12
+#TIMELIMIT	15
+#DEREF		never
+
+# This is required for Kolab to work with self-signed certs.
+TLS_REQCERT     allow

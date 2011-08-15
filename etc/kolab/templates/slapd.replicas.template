@@ -1,0 +1,17 @@
+KOLAB_META_START
+TARGET=@@@ldapserver_confdir@@@/slapd.replicas
+PERMISSIONS=0640
+OWNERSHIP=@@@ldapserver_usr@@@:@@@ldapserver_grp@@@
+RUNONCHANGE=@@@KOLABRC@@@ rc openldap restart
+KOLAB_META_END
+##  Copyright (c) 2004 Klaraelvdalens Datakonsult AB
+##     Written by Steffen Hansen <steffen@klaralvdalens-datakonsult.se>
+##
+## This program is Free Software under the GNU General Public License (>=v2).
+## Read the file COPYING that comes with this packages for details.
+
+@@@warning@@@
+
+# Replica statements for inclusion in slapd.conf
+@@@print getLDAPReplicas()@@@
+

@@ -1,0 +1,10 @@
+KOLAB_META_START
+TARGET=@@@webserver_document_root@@@/fbview/kronolith/config/kolab.php
+PERMISSIONS=0600
+OWNERSHIP=@@@kolab_usr@@@:@@@kolab_grp@@@
+KOLAB_META_END
+<?php
+$conf['storage']['default_domain'] = '@@@postfix-mydomain@@@';
+$conf['reminder']['server_name'] = '@@@fqdnhostname@@@';
+$conf['reminder']['from_addr'] = 'postmaster@@@@postfix-mydomain@@@';
+?>

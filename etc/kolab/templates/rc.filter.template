@@ -1,0 +1,40 @@
+KOLAB_META_START
+TARGET=@@@sysconfdir@@@/rc.d/rc.filter
+PERMISSIONS=0755
+OWNERSHIP=@@@kolab_musr@@@:@@@kolab_mgrp@@@
+KOLAB_META_END
+#!@@@KOLABRC@@@ rc
+##
+##  rc.filter -- Handles log rotation for the Kolab Postfix filters.
+##
+
+@@@warning@@@
+
+%config
+    filter_log_logfile="@@@resmgr_logdir@@@/filter.log"
+    filter_log_phperrors="@@@resmgr_logdir@@@/fatal.log"
+    filter_log_owner="@@@kolab_usr@@@"
+    filter_log_group="@@@kolab_grp@@@"
+    filter_log_prolog="true"
+    filter_log_epilog="true"
+    filter_log_numfiles="10"
+    filter_log_minsize="1M"
+    filter_log_complevel="9"
+
+%daily -u @@@kolab_susr@@@
+    shtool rotate -f \
+        -n ${filter_log_numfiles} -s ${filter_log_minsize} -d \
+        -z ${filter_log_complevel} -m 640 \
+        -o ${filter_log_owner} \
+        -g ${filter_log_group} \
+        -P "${filter_log_prolog}" \
+        -E "${filter_log_epilog}" \
+        "${filter_log_logfile}"
+    shtool rotate -f \
+        -n ${filter_log_numfiles} -s ${filter_log_minsize} -d \
+        -z ${filter_log_complevel} -m 640 \
+        -o ${filter_log_owner} \
+        -g ${filter_log_group} \
+        -P "${filter_log_prolog}" \
+        -E "${filter_log_epilog}" \
+        "${filter_log_phperrors}"
