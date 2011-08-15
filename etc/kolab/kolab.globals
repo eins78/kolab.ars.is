@@ -1,0 +1,199 @@
+#=================================================================
+# THIS FILE PROVIDES THE BASIC KOLAB SERVER CONFIGURAtION.
+# DO NOT EDIT ANYTHING HERE.
+#
+# In case you feel the need to modify any of the settings listed
+# below you can copy the setting to kolab.conf and edit it there.
+# This will override the default setting provided here.
+#=================================================================
+KOLABRC: /kolab/bin/openpkg
+LDAPD : openldap
+PHP : /kolab/bin/php
+RPM : /kolab/bin/openpkg rpm
+TAR : /kolab/lib/openpkg/tar
+WITHOPENPKG : yes
+aliases_file : /kolab/etc/postfix/aliases
+amavisd_conffile : /kolab/etc/amavisd/amavisd.conf
+amavisd_grp : kolab-r
+amavisd_home : /kolab/var/amavisd
+amavisd_logfile : /kolab/var/amavisd/amavisd.log
+amavisd_rusr : kolab-r
+amavisd_templatedir : /kolab/etc/amavisd/templates
+amavisd_usr : kolab
+backupdir : /kolab/etc/kolab
+backupfiles : 
+bind_addr : 0.0.0.0
+bind_any : TRUE
+bindir: /kolab/bin
+calendar_id : calendar
+clamav_confdir : /kolab/etc/clamav
+clamav_datadir : /kolab/share/clamav
+clamav_grp : kolab-r
+clamav_logfile : /kolab/var/clamav/clamd.log
+clamav_pidfile : /kolab/var/clamav/clamd.pid
+clamav_rusr : kolab-r
+clamav_socket : /kolab/var/clamav/clamd.sock
+clamav_usr : kolab
+conn_refresh_period : 60
+cyrus-admin : manager
+cyrus-admins : manager
+cyrus-autocreatequota : 100000
+cyrus-imap : TRUE
+cyrus-imaps : TRUE
+cyrus-pop3 : FALSE
+cyrus-pop3s : TRUE
+cyrus-sieve : TRUE
+debug : 0
+datadir : /kolab/share
+dimp_confdir: /kolab/var/kolab/www/client/dimp/config
+directory_mode : syncrepl
+emailserver_confdir : /kolab/etc/postfix
+emailserver_default_privs : kolab-n
+emailserver_grp : kolab-r
+emailserver_localstatedir : /kolab/var/postfix
+emailserver_logfile : /kolab/var/postfix/log/postfix.log
+emailserver_mail_owner : kolab
+emailserver_master_usr : kolab-n
+emailserver_musr : kolab
+emailserver_setgid_grp : kolab-r
+emailserver_socket : /kolab/var/kolab/lmtp
+emailserver_tables_usr : root
+emailserver_usr : kolab-n
+freebusy_cachedir: /kolab/var/kolab-freebusy/cache
+freebusy_confdir: /kolab/var/kolab/www/freebusy
+freebusy_grp: kolab-n
+freebusy_log_name: /kolab/var/kolab-freebusy/log/freebusy.log
+freebusy_log_type: file
+freebusy_logdir: /kolab/var/kolab-freebusy/log
+freebusy_usr: kolab
+freshclam_logfile : /kolab/var/clamav/freshclam.log
+freshclam_pidfile : /kolab/var/run/freshclam.pid
+graveyard_tscache: /kolab/var/kolab/graveyard-tscache.db
+graveyard_uidcache: /kolab/var/kolab/graveyard-uidcache.db
+gyard_deletion_period : 10080
+hashmethod: /kolab/sbin/slappasswd -s
+horde_confdir: /kolab/var/kolab/www/client/config
+horde_cookie_path: /client
+imap_confdir : /kolab/etc/imapd
+imap_confperm : 0640
+imap_grp : kolab-r
+imap_lmtp : /kolab/var/imapd/lmtp
+imap_masterlogfile : /kolab/var/imapd/log/master.log
+imap_misclogfile : /kolab/var/imapd/log/misc.log
+imap_notify_socket : /kolab/var/imapd/socket/notify
+imap_sievedir : /kolab/var/imapd/sieve
+imap_spool : /kolab/var/imapd/spool
+imap_statedir : /kolab/var/imapd
+imap_usr : kolab
+imappartitions_script : /kolab/sbin/kolab_imappartitions
+imp_confdir: /kolab/var/kolab/www/client/imp/config
+ingo_confdir: /kolab/var/kolab/www/client/ingo/config
+kolab_cafile: /kolab/etc/kolab/kolabserver-ca.crt
+kolab_grp: kolab-n
+kolab_hooksdir: /kolab/var/kolab/hooks
+kolab_locals: /kolab/etc/kolab/kolab.conf
+kolab_mailboxuiddb: /kolab/var/kolab/mailbox-uidcache.db
+kolab_mgrp: kolab
+kolab_musr: kolab
+kolab_php_module_prefix : 
+kolab_php_smarty_prefix : Smarty
+kolab_pidfile: /kolab/var/kolab/kolab.pid
+kolab_pkgs : kolabd kolab-fbview kolab-webadmin kolab-webclient perl-kolab php-smarty amavisd apache clamav db imapd openldap openssl php postfix spamassassin sqlite
+kolab_quotawarning: /kolab/etc/kolab/quotawarning.txt
+kolab_rgrp: kolab-r
+kolab_rusr: kolab-r
+kolab_scriptsdir : /kolab/etc/kolab
+kolab_smtpdpolicy_conffile_grp : kolab-n
+kolab_smtpdpolicy_conffile_usr : kolab
+kolab_statedir: /kolab/var/kolab
+kolab_susr: root
+kolab_usr: kolab-n
+kolab_wui : /admin
+kolabconf_script: /kolab/sbin/kolabconf
+kolabdir: /kolab/etc/kolab/
+kronolith_confdir: /kolab/var/kolab/www/client/kronolith/config
+ldap_uri : ldap://127.0.0.1:389
+ldapserver_argsfile : /kolab/var/openldap/slapd.args
+ldapserver_confdir : /kolab/etc/openldap
+ldapserver_dir : /kolab/var/openldap/openldap-data
+ldapserver_grp : kolab
+ldapserver_logfile : /kolab/var/openldap/openldap.log
+ldapserver_modulepath : false
+ldapserver_pidfile : /kolab/var/openldap/run/slapd.pid
+ldapserver_replogfile : /kolab/var/openldap/replog
+ldapserver_rgrp : kolab-r
+ldapserver_rusr : kolab
+ldapserver_schemadir : /kolab/etc/openldap/schema
+ldapserver_statedir : /kolab/var/openldap
+ldapserver_usr : kolab
+ldapserverslurpd_pidfile : /kolab/var/openldap/run/slurpd.pid
+libdir : /kolab/lib
+libexecdir : /kolab/libexec
+local_addr : 127.0.0.1
+localstatedir : /kolab/var
+log_level : 2
+mimp_confdir: /kolab/var/kolab/www/client/mimp/config
+mnemo_confdir: /kolab/var/kolab/www/client/mnemo/config
+nag_confdir: /kolab/var/kolab/www/client/nag/config
+passwd_confdir: /kolab/var/kolab/www/client/passwd/config
+pear_horde_pkgs : Kolab_Filter Kolab_Format Kolab_FreeBusy Kolab_Server Kolab_Storage Horde_Argv Horde_Auth Horde_Browser Horde_CLI Horde_Cache Horde_Cipher Horde_DOM Horde_DataTree Horde_Date Horde_Framework Horde_Group Horde_History Horde_LDAP Horde_MIME Horde_NLS Horde_Perms Horde_Secret Horde_Serialize Horde_SessionObjects Horde_Util Horde_iCalendar PEAR-Auth_SASL PEAR-Date PEAR-HTTP_Request PEAR-Horde-Channel PEAR-Log PEAR-Mail PEAR-Mail_mimeDecode PEAR-Net_LMTP PEAR-Net_SMTP PEAR-Net_Socket PEAR-Net_URL PEAR-PHPUnit-Channel PHPUnit
+phpini_dir : /kolab/etc/apache
+phplibdir : /kolab/lib/php
+phplibdir2 : /kolab/var/kolab/php
+pki_grp : kolab-r
+postfix-mydestination : $mydomain
+prefix : /kolab
+resmgr_confdir: /kolab/etc/kolab
+resmgr_conffile_grp: kolab-n
+resmgr_conffile_usr: kolab
+resmgr_localedir: /kolab/lib/php/data/Kolab_Filter/locale
+resmgr_locksdir: /kolab/var/kolab-filter/locks
+resmgr_log_name: /kolab/var/kolab-filter/log/filter.log
+resmgr_log_type: file
+resmgr_logdir: /kolab/var/kolab-filter/log
+resmgr_scriptsdir : /kolab/bin
+resmgr_tmpdir: /kolab/var/kolab-filter/tmp
+sasl_authdconffile : /kolab/etc/sasl/saslauthd.conf
+sasl_logfile : /kolab/var/sasl/log/saslauthd.log
+sasl_smtpconffile : /kolab/etc/sasl/smtpd.conf
+sbindir: /kolab/sbin
+sf_field_deleted : kolabdeleteflag
+sf_field_guid : entryUUID
+sf_field_modified : modifytimestamp
+sf_field_quota : cyrus-userquota
+sf_object_class : kolabsharedfolder
+slurpd_accept_addr : 127.0.0.1
+slurpd_addr : 127.0.0.1
+slurpd_port : 9999
+smarty_compiledir : /kolab/var/kolab/php/admin/templates_c
+spamassassin_confdir : /kolab/etc/spamassassin
+syncrepl_cookie_file : /kolab/var/kolab/syncrepl_cookie
+sysconfdir : /kolab/etc
+syslog_facility : user
+templatedir: /kolab/etc/kolab/templates
+turba_confdir: /kolab/var/kolab/www/client/turba/config
+uid : freebusy
+userPassword : freebusy
+user_field_deleted : kolabdeleteflag
+user_field_guid : entryUUID
+user_field_modified : modifytimestamp
+user_field_quota : cyrus-userquota
+user_object_class : inetOrgPerson
+webclient_data_root: /kolab/var/kolab/webclient_data
+webserver_acceptlock : /kolab/var/apache/log/accept.lock
+webserver_accesslogfile : /kolab/var/apache/log/apache-access.log
+webserver_cgidir : /kolab/var/kolab/www/cgi-bin
+webserver_confdir : /kolab/etc/apache
+webserver_document_root : /kolab/var/kolab/www
+webserver_errorlogfile : /kolab/var/apache/log/apache-error.log
+webserver_grp : kolab-n
+webserver_logdir : /kolab/var/apache/log
+webserver_musr : kolab
+webserver_pidfile : /kolab/var/apache/run/apache.pid
+webserver_runtime_status : /kolab/var/apache/log/apache_runtime_status
+webserver_sessions : /kolab/var/kolab/httpd_sessions
+webserver_sslmutex : /kolab/var/apache/log/ssl_mutex
+webserver_sslscache : /kolab/var/apache/log/ssl_scache
+webserver_tmpdir : /tmp
+webserver_usr : kolab-n
+webserver_web_prefix : 
